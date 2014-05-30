@@ -77,7 +77,7 @@
 //}
 #define degreesToRadians(x) (M_PI * x / 180.0)
 -(void)getView:(UIView *)view andDirection:(int)direction {
-    NSMutableArray *color = [[NSMutableArray alloc] init];
+    UIView *subViews = [[UIView alloc] init];
     
     NSLog(@"View from DrawViewController: %@", view);
     NSMutableArray *array = [[NSMutableArray alloc] init];
@@ -85,64 +85,12 @@
     for (UIView *subview in view.subviews) {
         if (subview.tag != -1) {
             [array addObject:subview];
+            subViews = subview;
         }
     }
     switch (direction) {
         // Up
         case 1:
-            // 1. Clear array allSubView
-            [self.allSubViews removeAllObjects];
-            [self.allNewSubView removeAllObjects];
-            
-            // 2. Get all subview from view
-            self.allSubViews = [self getViewsForView:self.viewCount];
-            
-            [self.allSubViews removeObject:view];
-            
-            // 3. Get color from view
-            color = [self getColorFromViews:self.allSubViews];
-            
-            // 5. Apply sorted color to array allSubview
-            [self applyColor:color toViewArray:self.allSubViews];
-            
-            NSLog(@"REMOVED VIEW! :%@", self.allSubViews);
-            
-            self.allSubViews = [NSMutableArray arrayWithArray:[[self.allSubViews reverseObjectEnumerator]allObjects]];
-            
-            for (UIView *view in self.allSubViews) {
-                CGPoint localPoint = [view bounds].origin;
-                CGPoint basePoint = [view convertPoint:localPoint toView:self.view];
-                NSLog(@"base points x: %f, y: %f", basePoint.x, basePoint.y);
-                UIView *newView = [[UIView alloc] initWithFrame:CGRectMake(basePoint.x, basePoint.y, view.frame.size.width, view.frame.size.height)];
-                [newView setBackgroundColor:[view backgroundColor]];
-                [self.view addSubview:newView];
-                [self.allNewSubView addObject:view];
-
-            }
-            NSLog(@"new view: %@", self.allNewSubView);
-            [self.allSubViews removeAllObjects];
-            self.allSubViews = [NSMutableArray arrayWithArray:self.allNewSubView];
-            NSLog(@"new view in allSubview: %@", self.allSubViews);
-//            [UIView beginAnimations:nil context:nil];
-//            [UIView setAnimationDelegate:self];
-//            [UIView setAnimationDuration:0.5];
-//            [UIView setAnimationCurve:UIViewAnimationCurveLinear];
-//            view.frame = CGRectMake(500, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
-//            for (UIView *subview in view.subviews) {
-//                if (subview.tag != 1) {
-//                    subview.frame = CGRectMake(-500 , subview.frame.origin.y, subview.frame.size.width, subview.frame.size.height);
-//                }
-//            }
-//            [UIView commitAnimations];
-            break;
-            
-        // Down
-        case 2:
-            
-            break;
-            
-        // Left
-        case 3:
             self.position = 1;
             [UIView beginAnimations:@"rotate" context:(__bridge_retained void *)(array)];
             [UIView setAnimationDelegate:self];
@@ -158,10 +106,11 @@
                 }
             }
             [UIView commitAnimations];
+
             break;
             
-        // Right
-        case 4:
+        // Down
+        case 2:
             self.position = 1;
             [UIView beginAnimations:@"rotate" context:(__bridge_retained void *)(array)];
             [UIView setAnimationDelegate:self];
@@ -177,6 +126,45 @@
                 }
             }
             [UIView commitAnimations];
+
+            break;
+            
+        // Left
+        case 3:
+        {
+            for (UIView *subview in view.subviews) {
+                if (subview.tag != -1) {
+                    [subview removeFromSuperview];
+                    subview.center = CGPointMake([view superview].frame.size.width/2, [view superview].frame.size.height/2);
+                    [view.superview addSubview:subview];
+                }
+                
+            }
+            [UIView animateWithDuration:0.5 delay:0.1 options:UIViewAnimationOptionCurveEaseIn animations:^{
+                view.frame = CGRectMake(-self.view.frame.size.width * 2, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
+            } completion:^(BOOL finished) {
+                [view removeFromSuperview];
+            }];
+        }
+            break;
+            
+        // Right
+        case 4:
+        {
+            for (UIView *subview in view.subviews) {
+                if (subview.tag != -1) {
+                    [subview removeFromSuperview];
+                    subview.center = CGPointMake([view superview].frame.size.width/2, [view superview].frame.size.height/2);
+                    [view.superview addSubview:subview];
+                }
+                
+            }
+            [UIView animateWithDuration:0.5 delay:0.1 options:UIViewAnimationOptionCurveEaseIn animations:^{
+                view.frame = CGRectMake(self.view.frame.size.width * 2, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
+            } completion:^(BOOL finished) {
+                [view removeFromSuperview];
+            }];
+        }
             break;
             
         default:
@@ -198,7 +186,7 @@
     NSLog(@"contex: %@", view);
     
     
-    if ([animationID isEqualToString:@""])
+    if ([animationID isEqualToString:@"rotate"])
     {
         if (self.position == 1) {
             NSLog(@"1");
